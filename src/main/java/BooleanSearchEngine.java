@@ -29,20 +29,20 @@ public class BooleanSearchEngine implements SearchEngine {
     public void textReap(PdfDocument doc, File file) {
         int lastPage = doc.getNumberOfPages();
         for (int i = 0; i < lastPage; i++) {
-            Map<String, PageEntry> countMap = new HashMap<>();
             String[] arrStr = PdfTextExtractor
                     .getTextFromPage(doc.getPage(i + 1))
                     .split("\\P{IsAlphabetic}+");
-            for (String item : arrStr) {
-                if (item.isEmpty()) {
-                    continue;
-                }
-                item = item.toLowerCase();
-                countMap.put(item, countMap
-                        .getOrDefault(item, new PageEntry(file.getName(), i + 1, 0))
-                        .addCountAndGetPE());
-            }
-            memory.addToMemory(countMap);//запись в
+            Map<Object, Long> countMap = Arrays
+                    .stream(arrStr)
+                    .collect(Collectors.groupingBy(a -> a, Collectors.counting()));
+            int finalI = i;
+            Map<String, PageEntry> mainMap = countMap
+                    .entrySet()
+                    .stream()
+                    .map(a -> new AbstractMap.SimpleEntry(a.getKey()
+                            , new PageEntry(file.getName(), finalI + 1, a.getValue())))
+                    .collect(Collectors.toMap(a -> (String) a.getKey(), a -> (PageEntry) a.getValue()));
+            memory.addToMemory(mainMap);//запись в
         }
     }
 
@@ -56,9 +56,9 @@ public class BooleanSearchEngine implements SearchEngine {
             }
         }
         if (list.size() > 0) {
-            Map<String, Integer> integerMap = list.stream()
-                    .collect(Collectors.groupingBy(PageEntry::generateKey, Collectors.summingInt(PageEntry::getCount)));
-            list = integerMap.entrySet()
+            Map<String, Long> longMap = list.stream()
+                    .collect(Collectors.groupingBy(PageEntry::generateKey, Collectors.summingLong(PageEntry::getCount)));
+            list = longMap.entrySet()
                     .stream()
                     .map(this::convertToPageEntry)
                     .collect(Collectors.toList());
@@ -69,11 +69,12 @@ public class BooleanSearchEngine implements SearchEngine {
         return list;
     }
 
-    //преобразование элемента countMap в объект PageEntry
-    private PageEntry convertToPageEntry(Map.Entry<String, Integer> a) {
+    //преобразование элемента Map в объект PageEntry
+    private PageEntry convertToPageEntry(Map.Entry<String, Long> a) {
         return new PageEntry(a.getKey().split(":")[0],
                 Integer.parseInt(a.getKey().split(":")[1]), a.getValue());
     }
+
     //удаление слов стоп листа из входящих строк
     public List<String> checkWords(String words) {
         String[] arrStr = words.split("\\P{IsAlphabetic}+");

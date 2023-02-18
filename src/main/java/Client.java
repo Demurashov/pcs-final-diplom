@@ -10,7 +10,7 @@ import java.util.List;
 public class Client {
     public static final String HOST = "127.0.0.1";
     public static final int PORT = 8989;
-    private static String[] words = {"за", "бизнес", "микросервис", "на", "смысл", "план", "паттерн", "к", "также","бизнес, проект и блокчейн"};
+    private static String[] words = {"за", "бизнес", "микросервис", "на", "смысл", "план", "паттерн", "к", "также", "бизнес, проект и блокчейн"};
 
     public static void main(String[] args) {
         Gson gsn = new Gson();
@@ -19,17 +19,19 @@ public class Client {
                  PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
                  BufferedReader bufferedReader = new BufferedReader((new InputStreamReader(socket.getInputStream())))) {
                 if (item != null) {
-                    System.out.println("Отправлен запрос:"+item);
+                    System.out.println("Отправлен запрос:" + item);
                     printWriter.println(item);
                 } else {
                     printWriter.println("Q");
                     break;
                 }
                 String strIn = bufferedReader.readLine();
-                List<PageEntry> pageEntryList = gsn.fromJson(strIn, new TypeToken<List<PageEntry>>() {}.getType());
+                List<PageEntry> pageEntryList = gsn.fromJson(strIn, new TypeToken<List<PageEntry>>() {
+                }.getType());
                 //System.out.println("Получено сообщение от сервера: " + strIn);
                 System.out.println("Получено сообщение от сервера: ");
-                pageEntryList.forEach(a-> System.out.println(a));
+                System.out.println(strIn);
+                //pageEntryList.forEach(a-> System.out.println(a));
             } catch (Exception exception) {
                 exception.getStackTrace();
             }
