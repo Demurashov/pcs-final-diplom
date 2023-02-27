@@ -56,29 +56,26 @@ public class BooleanSearchEngine implements SearchEngine {
             }
         }
         if (list.size() > 0) {
-            Map<String, Integer> integerMap = list.stream()
-                    .collect(Collectors.groupingBy(PageEntry::generateKey, Collectors.summingInt(PageEntry::getCount)));
-            list = integerMap.entrySet()
-                    .stream()
-                    .map(this::convertToPageEntry)
-                    .collect(Collectors.toList());
-        } else {
-            list.add(new PageEntry("Ничего не найдено", 0, 0));
+            Map<String, PageEntry> pageEntryMap = new HashMap<>();
+            list.forEach(item -> {
+                try {
+                    PageEntry itemCl = (PageEntry) item.clone();
+                    pageEntryMap.merge(itemCl.generateKey(), itemCl, (a, b) -> a.mergePE(b));
+                } catch (CloneNotSupportedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            list = pageEntryMap.entrySet().stream().map((a) -> a.getValue()).collect(Collectors.toList());
         }
         Collections.sort(list);
         return list;
     }
 
-    //преобразование элемента countMap в объект PageEntry
-    private PageEntry convertToPageEntry(Map.Entry<String, Integer> a) {
-        return new PageEntry(a.getKey().split(":")[0],
-                Integer.parseInt(a.getKey().split(":")[1]), a.getValue());
-    }
-
     //удаление слов стоп листа из входящих строк
     public List<String> checkWords(String words) {
         String[] arrStr = words.split("\\P{IsAlphabetic}+");
-        ArrayList<String> listWords = new ArrayList(Arrays.asList(arrStr));
+        List<String> listWords = new ArrayList(Arrays.asList(arrStr));
+        listWords.forEach(a -> a.toLowerCase());
         List<String> listSrtStop = StopListGenerator.loadFromTxtFile(STOPLISTFILE);
         listWords.removeAll(listSrtStop);
         return listWords;

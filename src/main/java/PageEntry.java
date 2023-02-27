@@ -1,4 +1,4 @@
-public class PageEntry implements Comparable<PageEntry> {
+public class PageEntry implements Comparable<PageEntry>, Cloneable {
     private String pdfName;
     private int page;
     private int count;
@@ -26,7 +26,14 @@ public class PageEntry implements Comparable<PageEntry> {
         return this;
     }
 
-    //создание уникального ключа для удобства работы с объектом в stream API
+    public PageEntry mergePE(PageEntry pageEntry) {
+        if (pageEntry.getPdfName().equals(this.getPdfName()) && pageEntry.getPage() == this.getPage()) {
+            this.count += pageEntry.count;
+        }
+        return this;
+    }
+
+    //создание уникального ключа
     public String generateKey() {
         return pdfName + ":" + page;
     }
@@ -40,4 +47,10 @@ public class PageEntry implements Comparable<PageEntry> {
     public int compareTo(PageEntry o) {
         return -(count - o.getCount());
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
 }

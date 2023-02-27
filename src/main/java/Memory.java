@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Memory {
-    Map<String, List> mainMap = new HashMap<>();
+    private Map<String, List> mainMap = new HashMap<>();//
 
     public void addToMemory(Map<String, PageEntry> countMap) {
         countMap.forEach(this::addList);

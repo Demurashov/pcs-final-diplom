@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Main {
-    public static final String HOST = "127.0.0.1";
-    public static final int PORT = 8989;
+    private static final String HOST = "127.0.0.1";
+    private static final int PORT = 8989;
 
     private static Gson gsn = new Gson();
 
