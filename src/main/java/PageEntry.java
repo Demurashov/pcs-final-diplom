@@ -1,4 +1,4 @@
-public class PageEntry implements Comparable<PageEntry>, Cloneable {
+public class PageEntry implements Comparable<PageEntry> {
     private String pdfName;
     private int page;
     private int count;
@@ -7,6 +7,13 @@ public class PageEntry implements Comparable<PageEntry>, Cloneable {
         this.pdfName = pdfName;
         this.page = page;
         this.count = count;
+    }
+
+    //Конструктор копирования
+    public PageEntry(PageEntry pageEntry) {
+        this.pdfName = pageEntry.pdfName;
+        this.page = pageEntry.page;
+        this.count = pageEntry.count;
     }
 
     public int getCount() {
@@ -46,11 +53,6 @@ public class PageEntry implements Comparable<PageEntry>, Cloneable {
     @Override
     public int compareTo(PageEntry o) {
         return -(count - o.getCount());
-    }
-
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 
 }

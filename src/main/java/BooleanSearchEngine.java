@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class BooleanSearchEngine implements SearchEngine {
     private Memory memory = new Memory();
     private final static File STOPLISTFILE = new File("stop-ru.txt");
+    private List<String> listSrtStop = StopListGenerator.loadFromTxtFile(STOPLISTFILE);
 
     public BooleanSearchEngine(File pdfsDir) throws IOException {
         if (pdfsDir.isDirectory()) {
@@ -23,6 +24,7 @@ public class BooleanSearchEngine implements SearchEngine {
     @Override
 
     public List<PageEntry> search(String words) {
+        words = words.toLowerCase();//приводим входящую строку к одному регистру
         return searchWords(words);
     }
 
@@ -55,16 +57,11 @@ public class BooleanSearchEngine implements SearchEngine {
                 list.addAll(memory.getMainMap().get(word));
             }
         }
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             Map<String, PageEntry> pageEntryMap = new HashMap<>();
-            list.forEach(item -> {
-                try {
-                    PageEntry itemCl = (PageEntry) item.clone();
-                    pageEntryMap.merge(itemCl.generateKey(), itemCl, (a, b) -> a.mergePE(b));
-                } catch (CloneNotSupportedException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            for (PageEntry item : list) {
+                pageEntryMap.merge(item.generateKey(), new PageEntry(item), (a, b) -> a.mergePE(b));
+            }
             list = pageEntryMap.entrySet().stream().map((a) -> a.getValue()).collect(Collectors.toList());
         }
         Collections.sort(list);
@@ -75,8 +72,6 @@ public class BooleanSearchEngine implements SearchEngine {
     public List<String> checkWords(String words) {
         String[] arrStr = words.split("\\P{IsAlphabetic}+");
         List<String> listWords = new ArrayList(Arrays.asList(arrStr));
-        listWords.forEach(a -> a.toLowerCase());
-        List<String> listSrtStop = StopListGenerator.loadFromTxtFile(STOPLISTFILE);
         listWords.removeAll(listSrtStop);
         return listWords;
     }
